@@ -1,8 +1,9 @@
 - name: Install kafka
   hosts: broker
   become: yes
+  gather_facts: no
   vars:
-    KAFKA_FILE: "kafka_2.13-4.0.0.tgz"
+    KAFKA_FILE: "kafka_2.13-4.0.0"
     KAFKA_VERSION: "4.0.0"
     KAFKA_FILES_DIR: "/home/ubuntu/kafka-files"
     KAFKA_INSTALL_DIR: "/opt/kafka"
@@ -29,8 +30,8 @@
       
     - name: download kafka KEYS to verify integrity
       get_url:
-        url: "https://downloads.apache.org/kafka/{{ KAFKA_VERSION }}/{{ KAFKA_FILE }}.sha512"
-        dest: "{{ KAFKA_FILES_DIR }}/{{ KAFKA_FILE }}.sha512"
+        url: "https://downloads.apache.org/kafka/{{ KAFKA_VERSION }}/{{ KAFKA_FILE }}.tgz.sha512"
+        dest: "{{ KAFKA_FILES_DIR }}/{{ KAFKA_FILE }}.tgz.sha512"
         owner: "{{ KAFKA_USER }}"
         group: "{{ KAFKA_USER }}"
         mode: "0777"
@@ -38,7 +39,7 @@
 
     - name: download kafka installation files
       get_url:
-        url: "https://downloads.apache.org/kafka/{{ KAFKA_VERSION }}/{{ KAFKA_FILE }}"
+        url: "https://downloads.apache.org/kafka/{{ KAFKA_VERSION }}/{{ KAFKA_FILE }}.tgz"
         dest: "{{ KAFKA_FILES_DIR }}/{{ KAFKA_FILE }}"
         owner: root
         group: root
@@ -53,9 +54,18 @@
 
     - name: Unarchive kafka files
       unarchive:
-        src: "{{ KAFKA_FILES_DIR }}/{{ KAFKA_FILE }}"
+        src: "{{ KAFKA_FILES_DIR }}/{{ KAFKA_FILE }}.tgz"
         dest: "{{ KAFKA_INSTALL_DIR }}"
         owner: root
         group: root
         mode: "0770"
       tags: uzip
+      
+    - name: generate cluster UUID
+      command: "{{ KAFKA_INSTALL_DIR }}/{{ KAFKA_FILE }}/bin/kafka-storage.sh random-uuid"
+      register: kafka_uuid
+      tags: uuid_handle
+      
+    - name: store uuid to file
+      shell: echo "{{ kafka_uuid.stdout }}" > cluster_uuid.txt
+      tags: uuid_handle
