@@ -7,6 +7,7 @@
     KAFKA_FILES_DIR: "/home/ubuntu/kafka-files"
     KAFKA_INSTALL_DIR: "/opt/kafka"
     KAFKA_USER: root
+    JAVA_VERSION: 17
   tasks:
     - name: check if files directory exists
       file:
@@ -32,7 +33,7 @@
         dest: "{{ KAFKA_FILES_DIR }}/{{ KAFKA_FILE }}.sha512"
         owner: "{{ KAFKA_USER }}"
         group: "{{ KAFKA_USER }}"
-        mode: "0770"
+        mode: "0777"
       tags: download_keys
 
     - name: download kafka installation files
@@ -41,7 +42,20 @@
         dest: "{{ KAFKA_FILES_DIR }}/{{ KAFKA_FILE }}"
         owner: root
         group: root
-        mode: '0777'
+        mode: "0777"
       tags: download_files
 
-    # - name: check integrity
+    - name: install OpenJDK
+      apt:
+        name: "openjdk-{{ JAVA_VERSION }}-jdk"
+        state: present
+      tags: java
+
+    - name: Unarchive kafka files
+      unarchive:
+        src: "{{ KAFKA_FILES_DIR }}/{{ KAFKA_FILE }}"
+        dest: "{{ KAFKA_INSTALL_DIR }}"
+        owner: root
+        group: root
+        mode: "0770"
+      tags: uzip
