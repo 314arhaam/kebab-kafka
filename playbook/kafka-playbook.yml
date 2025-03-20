@@ -1,0 +1,74 @@
+- name: Install kafka
+  hosts: broker
+  become: yes
+  gather_facts: no
+  vars:
+    KAFKA_FILE: "kafka_2.13-4.0.0"
+    KAFKA_VERSION: "4.0.0"
+    KAFKA_FILES_DIR: "/home/ubuntu/kafka-files"
+    KAFKA_INSTALL_DIR: "/opt/kafka"
+    KAFKA_USER: root
+    JAVA_VERSION: 17
+  tasks:
+    - name: check if files directory exists
+      file:
+        path: "{{ KAFKA_FILES_DIR }}"
+        state: directory
+        owner: "{{ KAFKA_USER }}"
+        group: "{{ KAFKA_USER }}"
+        mode: "0777"
+      tags: dir_check
+
+    - name: check if installation directory exists
+      file:
+        path: "{{ KAFKA_INSTALL_DIR }}"
+        state: directory
+        owner: "{{ KAFKA_USER }}"
+        group: "{{ KAFKA_USER }}"
+        mode: "0770"
+      tags: dir_check
+      
+    - name: download kafka KEYS to verify integrity
+      get_url:
+        url: "https://downloads.apache.org/kafka/{{ KAFKA_VERSION }}/{{ KAFKA_FILE }}.tgz.sha512"
+        dest: "{{ KAFKA_FILES_DIR }}/{{ KAFKA_FILE }}.tgz.sha512"
+        owner: "{{ KAFKA_USER }}"
+        group: "{{ KAFKA_USER }}"
+        mode: "0777"
+      tags: download_keys
+
+    - name: download kafka installation files
+      get_url:
+        url: "https://downloads.apache.org/kafka/{{ KAFKA_VERSION }}/{{ KAFKA_FILE }}.tgz"
+        dest: "{{ KAFKA_FILES_DIR }}/{{ KAFKA_FILE }}.tgz"
+        owner: root
+        group: root
+        mode: "0777"
+      tags: download_files
+
+    - name: install OpenJDK
+      apt:
+        name: "openjdk-{{ JAVA_VERSION }}-jdk"
+        state: present
+      tags: java
+
+    - name: Unarchive kafka files
+      unarchive:
+        src: "{{ KAFKA_FILES_DIR }}/{{ KAFKA_FILE }}.tgz"
+        dest: "{{ KAFKA_INSTALL_DIR }}"
+        owner: root
+        group: root
+        mode: "0770"
+      tags: uzip
+      
+    - name: generate cluster UUID
+      command: "{{ KAFKA_INSTALL_DIR }}/{{ KAFKA_FILE }}/bin/kafka-storage.sh random-uuid"
+      register: kafka_uuid
+      tags: uuid_handle
+      
+    - name: store uuid to file
+      shell: echo "{{ kafka_uuid.stdout }}" > cluster_uuid.txt
+      tags: uuid_handle
+
+    - name: config cluster
+      shell: "{{ KAFKA_INSTALL_DIR }}/{{ KAFKA_FILE }}/bin/kafka-storage.sh format --standalone -t {{ kafka_uuid.stdout }} -c {{ KAFKA_INSTALL_DIR }}/{{ KAFKA_FILE }}/config/server.properties"
