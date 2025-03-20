@@ -2,8 +2,9 @@
   hosts: broker
   become: yes
   vars:
+    KAFKA_FILE: "kafka_2.13-4.0.0.tgz"
     KAFKA_VERSION: "4.0.0"
-    KAFKA_FILES_DIR: "/home/kafka-files"
+    KAFKA_FILES_DIR: "/home/ubuntu/kafka-files"
     KAFKA_INSTALL_DIR: "/opt/kafka"
     KAFKA_USER: root
   tasks:
@@ -27,9 +28,20 @@
       
     - name: download kafka KEYS to verify integrity
       get_url:
-        url: "https://downloads.apache.org/kafka/{{ KAFKA_VERSION }}/KEYS"
-        dest: "{{ KAFKA_FILES_DIR }}/KEYS"
-        user: "{{ KAFKA_USER }}"
+        url: "https://downloads.apache.org/kafka/{{ KAFKA_VERSION }}/{{ KAFKA_FILE }}.sha512"
+        dest: "{{ KAFKA_FILES_DIR }}/{{ KAFKA_FILE }}.sha512"
+        owner: "{{ KAFKA_USER }}"
         group: "{{ KAFKA_USER }}"
         mode: "0770"
       tags: download_keys
+
+    - name: download kafka installation files
+      get_url:
+        url: "https://downloads.apache.org/kafka/{{ KAFKA_VERSION }}/{{ KAFKA_FILE }}"
+        dest: "{{ KAFKA_FILES_DIR }}/{{ KAFKA_FILE }}"
+        owner: root
+        group: root
+        mode: '0777'
+      tags: download_files
+
+    # - name: check integrity
