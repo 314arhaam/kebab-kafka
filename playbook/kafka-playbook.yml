@@ -71,4 +71,4 @@
       tags: uuid_handle
 
     - name: config cluster
-      shell: "{{ KAFKA_INSTALL_DIR }}/{{ KAFKA_FILE }}/bin/kafka-storage.sh format --standalone -t {{ kafka_uuid.stdout }} -c config/server.properties"
+      shell: "{{ KAFKA_INSTALL_DIR }}/{{ KAFKA_FILE }}/bin/kafka-storage.sh format --standalone -t {{ kafka_uuid.stdout }} -c {{ KAFKA_INSTALL_DIR }}/{{ KAFKA_FILE }}/config/server.properties"
