@@ -1,0 +1,35 @@
+- name: Install kafka
+  hosts: broker
+  become: yes
+  vars:
+    KAFKA_VERSION: "4.0.0"
+    KAFKA_FILES_DIR: "/home/kafka-files"
+    KAFKA_INSTALL_DIR: "/opt/kafka"
+    KAFKA_USER: root
+  tasks:
+    - name: check if files directory exists
+      file:
+        path: "{{ KAFKA_FILES_DIR }}"
+        state: directory
+        owner: "{{ KAFKA_USER }}"
+        group: "{{ KAFKA_USER }}"
+        mode: "0777"
+      tags: dir_check
+
+    - name: check if installation directory exists
+      file:
+        path: "{{ KAFKA_INSTALL_DIR }}"
+        state: directory
+        owner: "{{ KAFKA_USER }}"
+        group: "{{ KAFKA_USER }}"
+        mode: "0770"
+      tags: dir_check
+      
+    - name: download kafka KEYS to verify integrity
+      get_url:
+        url: "https://downloads.apache.org/kafka/{{ KAFKA_VERSION }}/KEYS"
+        dest: "{{ KAFKA_FILES_DIR }}/KEYS"
+        user: "{{ KAFKA_USER }}"
+        group: "{{ KAFKA_USER }}"
+        mode: "0770"
+      tags: download_keys
