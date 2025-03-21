@@ -1,4 +1,4 @@
-import kafka, yaml
+import kafka, yaml, json
 
 if __name__ == '__main__':
     with open('../servers-info.yml', 'r') as servers:
@@ -12,8 +12,10 @@ if __name__ == '__main__':
     with open('messages.txt', 'r') as message_file:
         message_list = message_file.read().replace('\n', ' ').split()
 
+    print(message_list)
+
     for msg in message_list:
         data = {"msg": msg}
-        producer.send(value = data, topic = servers_data['broker']['topic'])
-
-    producer.flush()
+        producer.send(value = data, topic = servers_data["kafka"]['broker']['topic'])
+        producer.flush()
+        print(f"message sent {data}")
