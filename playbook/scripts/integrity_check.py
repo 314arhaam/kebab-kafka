@@ -9,3 +9,5 @@ if __name__ == '__main__':
     sha512download = subprocess.run(f"sha512sum {download_file}", shell=True, capture_output=True)
     sha512download = sha512download.stdout.decode().split()[0]
     print(sha512download, sha512control)
+    if sha512download == sha512control:
+        raise ValueError("Check")
