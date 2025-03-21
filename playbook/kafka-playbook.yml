@@ -46,6 +46,10 @@
         mode: "0777"
       tags: download_files
 
+    - name: check integrity
+      shell: "python3 scripts/integrity_check.py {{ KAFKA_FILES_DIR }}/{{ KAFKA_FILE }}.tgz.sha512 {{ KAFKA_FILES_DIR }}/{{ KAFKA_FILE }}.tgz"
+      tags: integ
+      
     - name: install OpenJDK
       apt:
         name: "openjdk-{{ JAVA_VERSION }}-jdk"
