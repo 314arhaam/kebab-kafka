@@ -1,0 +1,11 @@
+- name: deploy
+  hosts: localhost
+  become: yes
+  vars_files:
+    - servers-info.yml
+  tasks:
+    - name: dep
+      debug:
+        msg: "Got the topic_name as => {{ kafka.broker.topic }}"
+    - name: create kafka topic
+      shell: "/opt/kafka/kafka_2.13-4.0.0/bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server 0.0.0.0:{{ kafka.broker.port }}"
