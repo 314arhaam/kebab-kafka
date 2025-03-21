@@ -4,7 +4,7 @@
   vars_files:
     - servers-info.yml
   tasks:
-    - name: dep
+    - name: show the topic name based on the given yaml file
       debug:
         msg: "Got the topic_name as => {{ kafka.broker.topic }}"
     - name: create kafka topic
