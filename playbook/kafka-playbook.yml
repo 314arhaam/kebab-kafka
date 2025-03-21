@@ -72,3 +72,24 @@
 
     - name: config cluster
       shell: "{{ KAFKA_INSTALL_DIR }}/{{ KAFKA_FILE }}/bin/kafka-storage.sh format --standalone -t {{ kafka_uuid.stdout }} -c {{ KAFKA_INSTALL_DIR }}/{{ KAFKA_FILE }}/config/server.properties"
+
+    - name: create systemd service for kafka
+      tags: systemd
+      template:
+        src: "templates/kafka-server.service.j2"
+        dest: "/etc/systemd/system/kafka-server.service"
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: systemd reload
+      tags: systemd
+      systemd:
+        daemon_reload: yes
+
+    - name: enable and restart service
+      tags: systemd
+      systemd:
+        name: "kafka-server"
+        state: started
+        enabled: yes
