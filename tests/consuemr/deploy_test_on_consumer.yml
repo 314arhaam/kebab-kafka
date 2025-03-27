@@ -1,0 +1,33 @@
+- name: deploy test on consumer servers
+  hosts: kafka_consumer
+  become: yes
+  become_user: ubuntu
+  vars:
+    REPO_NAME: "kebab-kafka"
+    REPO_URL: "https://github.com/314arhaam/{{ REPO_NAME }}.git"
+    REPO_DIR: "/home/ubuntu/{{ REPO_NAME }}"
+  tasks:
+    - name: check if directory exists
+      stat:
+        path: "{{ REPO_DIR }}"
+      register: repo_directory
+
+    - name: repo stats show
+      debug:
+        msg: "Repo status on the consumer => {{ repo_directory.stat.exists }}"
+
+    - name: pull if directory exists
+      git:
+        repo: "{{ REPO_URL }}"
+        dest: "{{ REPO_DIR }}"
+        version: main
+        update: yes
+      when: repo_directory.stat.exists
+
+    - name: clone directory
+      git:
+        repo: "{{ REPO_URL }}"
+        dest: "{{ REPO_DIR }}"
+        version: main
+        clone: yes
+      when: not repo_directory.stat.exists
