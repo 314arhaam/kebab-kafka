@@ -1,5 +1,5 @@
 - name: deploy
-  hosts: localhost
+  hosts: broker
   become: yes
   vars_files:
     - servers-info.yml
