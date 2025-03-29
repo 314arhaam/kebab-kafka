@@ -1,9 +1,8 @@
-import kafka, json
-import yml
+import kafka, json, yaml
 
 if __name__ == '__main__':
     with open('../servers-info.yml', 'r') as servers:
-        servers_data = yml.safe_load(servers)
+        servers_data = yaml.safe_load(servers)
         
     producer = kafka.KafkaProducer(
         bootstrap_servers = [f"{servers_data['kafka']['broker']['ip']}:{servers_data['kafka']['broker']['port']}"],
